@@ -31,10 +31,10 @@ def import_settings(module, parent_locals):
 		_get_settings(module)
 	except ImportError:
 		#TODO Raise a warning
-		_get_settings('production')
+		module = 'production'
 
 	# Load the config settings properties into the local scope
-	for key, value in _climb_settings(config).items():
+	for key, value in _climb_settings(module).items():
 		parent_locals[key] = value
 
 
