@@ -4,10 +4,10 @@ Django MetaSettings
 Licensed under the MIT License. See LICENSE.
 http://creativecommons.org/licenses/MIT/
 """
-import os, re
+import socket, re
 
 def get_hostname():
-	hostname = os.uname()[1]
+	hostname = socket.gethostname()
 
 	# Convert the machine's hostname into alphanumeric characters, suitable for python module names
 	# Note: We don't want to use \W because it also matches underscores.
