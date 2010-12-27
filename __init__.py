@@ -7,14 +7,10 @@ http://creativecommons.org/licenses/MIT/
 import socket, re
 
 def get_hostname():
-	hostname = socket.gethostname()
-
 	# Convert the machine's hostname into alphanumeric characters, suitable for python module names
-	# Note: We don't want to use \W because it also matches underscores.
+	# Note: We don't want to use \w because it also matches underscores.
 	#       The string segment "._." would end up as "___" instead of "_".
-	hostname = re.sub('[^a-zA-Z0-9]+', '_', hostname)
-
-	return hostname
+	return re.sub('[^a-zA-Z0-9]+', '_', socket.gethostname())
 
 
 def import_settings(module):
