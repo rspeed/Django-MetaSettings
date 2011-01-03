@@ -12,9 +12,9 @@ FQDN = 2
 PATH = 3
 
 class patterns():
-	def __init__(self, method, locals, *patterns):
-		self.settings_dir = os.path.dirname(os.path.abspath(locals['__file__']))
-		self.settings = locals
+	def __init__(self, method, settings_dir, *patterns):
+		self._settings_dir = settings_dir
+		self._settings = {}
 
 		match = {
 			HOSTNAME: lambda: socket.gethostname(),
@@ -25,15 +25,25 @@ class patterns():
 
 		for pattern in patterns:
 			if bool(re.match(pattern[0], match)):
-				self.modules = pattern[1]
+				self._modules = pattern[1]
+
+				# Make sure the list of modules is either a list or a tuple
+				if type(self._modules) not in (list, tuple):
+					self._modules = (self._modules,)
+
 				return
 
 		raise Exception("No match for %s." % match)
 
+	def import_settings(self, name):
+			execfile('%s/%s.py' % (self._settings_dir, name), globals(), self._settings)
 
-	def import_settings(self):
-		for module in self.modules:
-			execfile('%s/%s.py' % (self.settings_dir, module), globals(), self.settings)
+
+	def settings(self):
+		self.import_settings('base')
+
+		for module in self._modules:
+			self.import_settings(module)
 
 		# Only return settings with upper-case names
-		return dict([(setting, self.settings[setting]) for setting in self.settings.keys() if setting.isupper()])
+		return dict([(setting, self._settings[setting]) for setting in self._settings.keys() if setting.isupper()])
