@@ -1,13 +1,13 @@
 
 TEMPLATE_DIRS = (
-	'/Library/WebServer/www/example.com/app/templates/'
+	'/Users/rspeed/Library/Eclipse/Workspace/Django-MetaSettings/example/templates/',
 )
 
-MEDIA_ROOT = '/Library/WebServer/example.com/media/'
+MEDIA_ROOT = '/Users/rspeed/Library/Eclipse/Workspace/Django-MetaSettings/example/media'
 
 DATABASES = {
 	'default': {
 		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': '/Library/WebServer/example.com/db/default.sqlite',
+		'NAME': '/Users/rspeed/Library/Eclipse/Workspace/Django-MetaSettings/example/db/default.sqlite',
 	}
 }
