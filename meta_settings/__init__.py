@@ -5,30 +5,41 @@ Licensed under the MIT License. See LICENSE.
 http://creativecommons.org/licenses/MIT/
 """
 
-import socket, re, os
+import socket
+import re
+import os
 
-HOSTNAME = 1
-FQDN = 2
-PATH = 3
 
-class patterns():
-	_import_complete = lambda self: len(self._settings.keys()) > 0
+HOSTNAME = 'METASETTINGS_MATCHING_METHOD_HOST_NAME'
+FQDN = 'METASETTINGS_MATCHING_METHOD_DOMAIN_NAME'
+PATH = 'METASETTINGS_MATCHING_METHOD_ROOT_PATH'
+ENV = 'METASETTINGS_MATCHING_METHOD_ENVIRONMENTAL_VARIABLE'
 
+# Name of the environment variable containing the key for ENV matching
+ENV_NAME = 'METASETTINGS_KEY'
+
+
+class MetaSettings():
 	def __init__(self, settings_dir):
 		self._settings_dir = settings_dir
 		self._settings = {}
 		self._modules = []
 
 
+	def import_completed(self):
+		return bool(self._settings.keys())
+
+
 	def add_modules(self, method, *patterns):
-		if self._import_complete():
+		if self.import_completed():
 			raise RuntimeError('Settings already configured.')
 
 		match = {
-			HOSTNAME: lambda: socket.gethostname(),
-			FQDN: lambda: socket.getfqdn(),
-			PATH: lambda: None,
-			None: lambda: None,
+						HOSTNAME: lambda: socket.gethostname(),
+						FQDN: lambda: socket.getfqdn(),
+						PATH: lambda: None,
+						ENV: lambda: os.getenv(ENV_NAME),
+						None: lambda: None,
 		}.get(method)()
 
 		for pattern in patterns:
@@ -53,11 +64,19 @@ class patterns():
 
 	def get_settings(self):
 		# Only import the modules once
-		if not self._import_complete():
+		if not self.import_completed():
 			self.import_settings('base')
 
 			for module in self._modules:
 				self.import_settings(module)
 
 		# Only return settings with upper-case names
-		return dict([(setting, self._settings[setting]) for setting in self._settings.keys() if setting.isupper()])
+		return dict([
+								(setting, self._settings[setting])
+								for setting in self._settings.keys()
+								if setting.isupper()
+		])
+
+
+class MetaSettingsError(Exception):
+	"""Base class for errors in Django-MetaSettings."""
