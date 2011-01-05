@@ -8,6 +8,7 @@ http://creativecommons.org/licenses/MIT/
 import socket
 import re
 import os
+from django.conf import settings
 
 
 HOSTNAME = 'METASETTINGS_MATCHING_METHOD_HOST_NAME'
@@ -31,6 +32,7 @@ class MetaSettings():
 
 
 	def add_modules(self, method, *patterns):
+		# Can't be run once Django has been configured
 		if self.import_completed():
 			raise RuntimeError('Settings already configured.')
 
@@ -62,20 +64,27 @@ class MetaSettings():
 			execfile('%s/%s.py' % (self._settings_dir, name), globals(), self._settings)
 
 
-	def get_settings(self):
-		# Only import the modules once
-		if not self.import_completed():
-			self.import_settings('base')
+	def configure(self):
+		# This can only be run once
+		if self.import_completed():
+			raise MetaSettingsError('MetaSettings has already configured Django.')
 
-			for module in self._modules:
-				self.import_settings(module)
+		# The base class is always imported first
+		self.import_settings('base')
 
-		# Only return settings with upper-case names
-		return dict([
-								(setting, self._settings[setting])
-								for setting in self._settings.keys()
-								if setting.isupper()
-		])
+		# Import each additional module in the order specified by the configuration
+		for module in self._modules:
+			self.import_settings(module)
+
+		# Filter out settings without upper-case names
+		conf = dict(
+			(key, value)
+			for key, value in self._settings.items()
+			if key.isupper()
+		)
+
+		# Pass the configuration to Django
+		settings.configure(**conf)
 
 
 class MetaSettingsError(Exception):
