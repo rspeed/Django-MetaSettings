@@ -61,7 +61,18 @@ class MetaSettings():
 
 
 	def import_settings(self, name):
-			execfile('%s/%s.py' % (self._settings_dir, name), globals(), self._settings)
+		""" Loads the settings from the named settings file. """
+		execfile('%s/%s.py' % (self._settings_dir, name), globals(), self._settings)
+
+
+	def get_settings(self):
+		""" Returns a list of settings from the loaded modules. """
+		# Filter out settings without upper-case names
+		return dict(
+			(key, value)
+			for key, value in self._settings.items()
+			if key.isupper()
+		)
 
 
 	def configure(self):
@@ -76,12 +87,7 @@ class MetaSettings():
 		for module in self._modules:
 			self.import_settings(module)
 
-		# Filter out settings without upper-case names
-		conf = dict(
-			(key, value)
-			for key, value in self._settings.items()
-			if key.isupper()
-		)
+		conf = self.get_settings()
 
 		# Pass the configuration to Django
 		settings.configure(**conf)
