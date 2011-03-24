@@ -1,0 +1,3 @@
+import metasettings
+
+metasettings.init()
