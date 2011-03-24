@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(name='Django-MetaSettings',
 	version='0.1',
-	description='',
+	description='Simplify the obnoxious task of configuring the same Django project in multiple environments.',
 	author='Rob Speed',
 	author_email='speed.rob@gmail.com',
 	url='https://github.com/rspeed/Django-MetaSettings',
