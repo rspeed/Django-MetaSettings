@@ -21,52 +21,21 @@ ENV = 'METASETTINGS_MATCHING_METHOD_ENVIRONMENTAL_VARIABLE'
 # Name of the environment variable containing the key for ENV matching
 ENV_NAME = 'METASETTINGS_KEY'
 
-
 def init():
 	"""
 	Initialize Django MetaSettings by replacing django.conf.settings with a MetaSettings object.
 	"""
-	django.conf.settings = LazyMetaSettings()
+	django.conf.Settings = MetaSettings
 
 
-class LazyMetaSettings(django.conf.LazySettings):
-	def __init__(self):
-		try:
-			settings_module = os.environ[django.conf.ENVIRONMENT_VARIABLE]
-			if not settings_module: # If it's set but is an empty string.
-				raise KeyError
-		except KeyError:
-			# NOTE: This is arguably an EnvironmentError, but that causes
-			# problems with Python's interactive help.
-			raise ImportError("Settings cannot be imported, because environment variable %s is undefined." % django.conf.ENVIRONMENT_VARIABLE)
-
-		self._wrapped = MetaSettings(settings_module)
-
-
-class MetaSettings(django.conf.BaseSettings):
+class MetaSettings(django.conf.Settings):
 	def __init__(self, settings_module):
+		# Run the standard settings import
+		super(MetaSettings, self).__init__(settings_module)
 
-		for setting in dir(global_settings):
-			if setting == setting.upper():
-				setattr(self, setting, getattr(global_settings, setting))
-
-
-		self.SETTINGS_MODULE = settings_module
-
-		try:
-			mod = importlib.import_module(self.SETTINGS_MODULE)
-		except ImportError, e:
-			raise ImportError("Could not import settings '%s' (Is it on sys.path?): %s" % (self.SETTINGS_MODULE, e))
-
-		tuple_settings = ("INSTALLED_APPS", "TEMPLATE_DIRS")
-
-		for setting in dir(mod):
-			if setting == setting.upper():
-				setting_value = getattr(mod, setting)
-				if setting in tuple_settings and type(setting_value) == str:
-					setting_value = (setting_value,) # In case the user forgot the comma.
-				setattr(self, setting, setting_value)
-
+		meta_method = getattr(self, "METASETTINGS_METHOD", HOSTNAME) # Default to hostname matching
+		meta_dir = getattr(self, "METASETTINGS_DIR", self.SETTINGS_MODULE) # Default to the name of the settings module
+		meta_patterns = getattr(self, "METASETTINGS_PATTERNS", (None, [])) # Default to something that just doesn't work
 
 		match = {
 			HOSTNAME: lambda: socket.gethostname(),
@@ -74,10 +43,10 @@ class MetaSettings(django.conf.BaseSettings):
 			PATH: lambda: None,
 			ENV: lambda: os.getenv(ENV_NAME),
 			None: lambda: None,
-		}.get(self.METASETTINGS_METHOD)()
+		}.get(meta_method)()
 
 		# Match the environment
-		modules = [pattern[1] for pattern in self.METASETTINGS_PATTERNS if re.match(pattern[0], match)]
+		modules = [pattern[1] for pattern in meta_patterns if re.match(pattern[0], match)]
 
 		if len(modules) == 0:
 			raise Exception("No match for %s." % match)
@@ -85,16 +54,17 @@ class MetaSettings(django.conf.BaseSettings):
 		# There may be more than one match, default to the first
 		modules = modules[0]
 
-		# Make sure the list of modules is either a list or a tuple
+		# Make sure the list of modules is iterable
 		if type(modules) not in (list, tuple):
 			modules = (modules,)
 
-
-		settings = {}
+		# Initialize a settings dictionary to maintain scope between settings files
+		settings = dict((key, getattr(self, key)) for key in dir(self))
 
 		for module in modules:
-			execfile('%s/%s.py' % (self.METASETTINGS_DIR, module), globals(), settings)
+			execfile('%s/%s.py' % (meta_dir, module), globals(), settings)
 
+		# The rest is copied from django.conf.Settings with a few minor tweaks
 
 		tuple_settings = ("INSTALLED_APPS", "TEMPLATE_DIRS")
 
@@ -142,7 +112,3 @@ class MetaSettings(django.conf.BaseSettings):
 
 			# ... then invoke it with the logging settings
 			logging_config_func(self.LOGGING)
-
-
-class MetaSettingsError(Exception):
-	"""Base class for errors in Django-MetaSettings."""
