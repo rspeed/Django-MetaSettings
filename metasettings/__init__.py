@@ -64,51 +64,7 @@ class MetaSettings(django.conf.Settings):
 		for module in modules:
 			execfile('%s/%s.py' % (meta_dir, module), globals(), settings)
 
-		# The rest is copied from django.conf.Settings with a few minor tweaks
-
-		tuple_settings = ("INSTALLED_APPS", "TEMPLATE_DIRS")
-
+		# Move the settings into the local scope
 		for (setting, setting_value) in settings.items():
 			if setting == setting.upper():
-				if setting in tuple_settings and type(setting_value) == str:
-					setting_value = (setting_value,) # In case the user forgot the comma.
 				setattr(self, setting, setting_value)
-
-		# Expand entries in INSTALLED_APPS like "django.contrib.*" to a list
-		# of all those apps.
-		new_installed_apps = []
-		for app in self.INSTALLED_APPS:
-			if app.endswith('.*'):
-				app_mod = importlib.import_module(app[:-2])
-				appdir = os.path.dirname(app_mod.__file__)
-				app_subdirs = os.listdir(appdir)
-				app_subdirs.sort()
-				name_pattern = re.compile(r'[a-zA-Z]\w*')
-				for d in app_subdirs:
-					if name_pattern.match(d) and os.path.isdir(os.path.join(appdir, d)):
-						new_installed_apps.append('%s.%s' % (app[:-2], d))
-			else:
-				new_installed_apps.append(app)
-		self.INSTALLED_APPS = new_installed_apps
-
-		if hasattr(time, 'tzset') and self.TIME_ZONE:
-			# When we can, attempt to validate the timezone. If we can't find
-			# this file, no check happens and it's harmless.
-			zoneinfo_root = '/usr/share/zoneinfo'
-			if (os.path.exists(zoneinfo_root) and not
-					os.path.exists(os.path.join(zoneinfo_root, *(self.TIME_ZONE.split('/'))))):
-				raise ValueError("Incorrect timezone setting: %s" % self.TIME_ZONE)
-			# Move the time zone info into os.environ. See ticket #2315 for why
-			# we don't do this unconditionally (breaks Windows).
-			os.environ['TZ'] = self.TIME_ZONE
-			time.tzset()
-
-		# Settings are configured, so we can set up the logger if required
-		if self.LOGGING_CONFIG:
-			# First find the logging configuration function ...
-			logging_config_path, logging_config_func_name = self.LOGGING_CONFIG.rsplit('.', 1)
-			logging_config_module = importlib.import_module(logging_config_path)
-			logging_config_func = getattr(logging_config_module, logging_config_func_name)
-
-			# ... then invoke it with the logging settings
-			logging_config_func(self.LOGGING)
