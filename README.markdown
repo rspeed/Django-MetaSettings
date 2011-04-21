@@ -76,7 +76,7 @@ metasettings.init()
 
 ### Modify the project's settings.py
 
-```
+``` python
 import metasettings
 METASETTINGS_METHOD = metasettings.HOSTNAME
 METASETTINGS_DIR = 'settings'
