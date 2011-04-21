@@ -2,14 +2,9 @@
 
 Simplify the obnoxious task of configuring the same Django project in multiple environments.
 
-***
-
 ## About
 
 Django MetaSettings allows you to place settings specific to different environments into separate files. Based on certain environmental conditions different settings can be loaded from multiple sources.
-
-
-***
 
 ## Installation
 
