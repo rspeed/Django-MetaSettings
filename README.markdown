@@ -10,11 +10,11 @@ Django MetaSettings allows you to place settings specific to different environme
 
 ### Create the environment specific settings files
 
-Start by creating a folder to store the settings files. Since Django MetaSettings doesn't use ``import``, so the folder doesn't need to be a package. You can call the folder anything you want, but settings is recommended for the sake of simplicity.
+Start by creating a folder to store the settings files. Django MetaSettings doesn't use ``import``, so the folder doesn't need to be a package. You can call the folder anything you want, but "settings" is likely the most intuitive choice.
 
 ``mkdir settings``
 
-Create a python script for each set of environmental conditions, containing the apropriate settings. For example, development.py might enable debugging and debug_toolbar.
+Create a python script for each set of environmental conditions, containing the apropriate settings. For example, development.py might enable debugging and the Django Debug Toolbar.
 
 ``` python
 """
@@ -28,13 +28,15 @@ TEMPLATE_DEBUG = DEBUG
 INTERNAL_IPS = ('127.0.0.1',)
 
 MIDDLEWARE_CLASSES += (
-	'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 INSTALLED_APPS += (
-	'debug_toolbar',
+    'debug_toolbar',
 )
 ```
+
+**Note**: Your source code editor may show warnings when modifying variables like "INSTALLED_APPS" because the scope is shared between all of the settings files. You can safely ignore these warnings as long as the variable is initialized in a file loaded before the current one. In this case, because "MIDDLEWARE_CLASSES" and "INSTALLED_APPS" are initialized in settings.py.
 
 Additionally, you may want to create a settings file for each machine the application will run on.
 
@@ -44,15 +46,18 @@ glados.py
 Settings for the system identified as GLaDOS.
 """
 
-DATABASE_USER = 'dbuser'
-DATABASE_PASSWORD = 'dbpassword'
+DATABASES['default'].update({
+    'USER': 'dbuser',
+    'PASSWORD': 'dbpassword',
+    'NAME': 'example_testing_db_1'
+})
 
 MEDIA_ROOT = '/var/www/test/assets'
 MEDIA_URL = '/assets/'
 ADMIN_MEDIA_PREFIX = '/assets/admin/'
 
 TEMPLATE_DIRS = (
-	"/var/www/test/templates",
+    '/var/www/test/templates',
 )
 ```
 
@@ -67,7 +72,7 @@ import metasettings
 METASETTINGS_METHOD = metasettings.HOSTNAME
 METASETTINGS_DIR = 'settings'
 METASETTINGS_PATTERNS = (
-	(r'hostname', ('base',),
+    (r'hostname', ('base',),
 )
 metasettings.init(globals())
 ```
