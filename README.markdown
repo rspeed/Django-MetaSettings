@@ -1,10 +1,14 @@
-# Django-MetaSettings
+# Django MetaSettings
 
 Simplify the obnoxious task of configuring the same Django project in multiple environments.
 
 ## About
 
-Django MetaSettings allows you to place settings specific to different environments into separate files. Based on certain environmental conditions different settings can be loaded from multiple sources.
+Django MetaSettings allows you to place settings specific to different environments into separate files. Based on certain environmental conditions different settings can be loaded from multiple sources. This solves the classic issues of unnecessary development/production branches, or leaving uncommitted code changes sitting on a server.
+
+The example use case is differentiating between development and production and individual machines, but the design is extremely flexible.
+
+Unlike most other split-settings solutions, Django MetaSettings maintains the global scope between settings files. Because of this, it's possible to modify settings initiated in a different file. This allows behavior like adding items to ``INSTALLED_APPLICATONS`` only in certain conditions.
 
 ## Installation
 
@@ -68,9 +72,9 @@ TEMPLATE_DIRS = (
 ### Modify the project's settings.py
 
 ``` python
+import os
 import metasettings
 
-gettext = lambda s: s
 PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 METASETTINGS_METHOD = metasettings.HOSTNAME
@@ -85,8 +89,11 @@ metasettings.init(globals())
 
 You can declare the METASETTINGS_* entries where you want in the ``settings.py`` file, but the line starting with ``metasettings.init`` should be at the end. All settings after this line will override those loaded with Django MetaSettings.
 
+## Settings
 
-#### METASETTINGS_METHOD
+Use these variables in settings.py to tailor Django MetaSettings to your environment.
+
+### METASETTINGS_METHOD
 
 The possible values for METASETTINGS_METHOD are:
 
@@ -94,24 +101,24 @@ The possible values for METASETTINGS_METHOD are:
 
 **metasettings.FQDN:** Match against the server's fully qualified domain name.
 
-**metasettings.ENV:** Match against an environmental variable. See *METASETTINGS_ENV_NAME* below.
+**metasettings.ENV:** Match against an environmental variable. See **METASETTINGS_ENV_NAME**.
 
-**metasettings.VAR:** Match against a settings variable. See *METASETTINGS_VAR_NAME* below.
+**metasettings.VAR:** Match against a settings variable. See **METASETTINGS_VAR_NAME**.
 
-#### METASETTINGS_DIR
+### METASETTINGS_DIR
 
 This is the path to the directory where settings files are store. It defaults to "settings", but it's recommended that you provide a full path by setting and using "PROJECT_PATH".
 
-#### METASETTINGS_PATTERNS
+### METASETTINGS_PATTERNS
 
 A list of lists to determine which settings files to load. The first value in each list is a regular expression pattern to test. The second value is a list of modules (located within the settings directory) to load. If there is only one module, a string can be substituted for the list.
 
 **Note** If multiple patterns match, only the first will be used.
 
-#### METASETTINGS_ENV_NAME
+### METASETTINGS_ENV_NAME
 
 The name of the environmental variable to use for ENV matching. Defaults to "METASETTINGS_KEY" if not set.
 
-#### METASETTINGS_VAR_NAME
+### METASETTINGS_VAR_NAME
 
 The name of the settings variable to use for VAR matching. Defaults to "PROJECT_PATH" if not set.
