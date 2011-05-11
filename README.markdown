@@ -62,11 +62,6 @@ TEMPLATE_DIRS = (
 
 ### Modify the project's settings.py
 
-You can declare the METASETTINGS_* entries where you want in the ``settings.py`` file, but the line starting with ``metasettings.init`` should be at the end of the file.
-
-All settings after this line will overload those loaded with Django MetaSettings
-
-
 ``` python
 import metasettings
 METASETTINGS_METHOD = metasettings.HOSTNAME
@@ -76,3 +71,5 @@ METASETTINGS_PATTERNS = (
 )
 metasettings.init(globals())
 ```
+
+You can declare the METASETTINGS_* entries where you want in the ``settings.py`` file, but the line starting with ``metasettings.init`` should be at the end. All settings after this line will override those loaded with Django MetaSettings.
