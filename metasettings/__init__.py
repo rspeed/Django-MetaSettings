@@ -8,10 +8,7 @@ http://creativecommons.org/licenses/MIT/
 import socket
 import re
 import os
-import time
-import django.conf
-from django.conf import global_settings
-from django.utils import importlib
+
 
 HOSTNAME = 'METASETTINGS_MATCHING_METHOD_HOST_NAME'
 FQDN = 'METASETTINGS_MATCHING_METHOD_DOMAIN_NAME'
@@ -56,7 +53,7 @@ def init(_globals):
 	modules = modules[0]
 
 	# Make sure the list of modules is iterable
-	if type(modules) not in (list, tuple):
+	if not hasattr(modules, '__iter__'):
 		modules = (modules,)
 
 	full_meta_dir = os.path.join(os.path.dirname(_globals['__file__']), meta_dir)
