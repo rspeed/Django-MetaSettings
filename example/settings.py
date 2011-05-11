@@ -1,20 +1,17 @@
-# Configure Django MetaSettings
+import os
 import metasettings
 
+PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
+
 METASETTINGS_METHOD = metasettings.HOSTNAME
-
-METASETTINGS_DIR = 'settings'
-
+METASETTINGS_DIR = PROJECT_PATH + '/settings'
 METASETTINGS_PATTERNS = (
 	(r'production1', 'production'),
 	(r'stage1', ('production', 'stage')),
-	(r'dev1', ('development')),
+	(r'dev1', 'development'),
 
 	(r'glados', ('development', 'glados')),
 )
-
-DEBUG = False
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
 	('Project Lead', 'project_lead@example.com'),
@@ -24,8 +21,9 @@ MANAGERS = ADMINS
 
 DATABASES = {
 	'default': {
-		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': '/var/www/example.com/db/default.sqlite',
+		'ENGINE': 'django.db.backends.mysql',
+		'USER': 'dbuser',
+		'NAME': 'examplecom',
 	}
 }
 
