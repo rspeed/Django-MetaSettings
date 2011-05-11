@@ -56,6 +56,8 @@ def init(_globals):
 	if not hasattr(modules, '__iter__'):
 		modules = (modules,)
 
-	full_meta_dir = os.path.join(os.path.dirname(_globals['__file__']), meta_dir)
-	for module in modules:
-		execfile('%s/%s.py' % (full_meta_dir, module), _globals)
+	try:
+		for module in modules:
+			execfile('%s/%s.py' % (meta_dir, module), _globals)
+	except IOError, e:
+		raise ImportError("'%s' not found in '%s'." % (module, meta_dir))
