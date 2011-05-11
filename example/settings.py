@@ -71,3 +71,5 @@ INSTALLED_APPS = (
 )
 
 MEDIA_ROOT = '/var/www/example.com/media'
+
+metasettings.init(globals())

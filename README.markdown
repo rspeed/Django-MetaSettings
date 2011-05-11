@@ -60,16 +60,12 @@ TEMPLATE_DIRS = (
 
 **PIP** ``pip install django-metasettings`` or **easy_install** ``easy_install django-metasettings``
 
-### Modify the project's __init__.py
-
-Before anything else can happen, Django MetaSettings needs to swap out the standard settings class with a custom subclass that works the magic.
-
-``` python
-import metasettings
-metasettings.init()
-```
-
 ### Modify the project's settings.py
+
+You can declare the METASETTINGS_* entries where you want in the ``settings.py`` file, but the line starting with ``metasettings.init`` should be at the end of the file.
+
+All settings after this line will overload those loaded with Django MetaSettings
+
 
 ``` python
 import metasettings
@@ -78,4 +74,5 @@ METASETTINGS_DIR = 'settings'
 METASETTINGS_PATTERNS = (
 	(r'hostname', ('base',),
 )
+metasettings.init(globals())
 ```
