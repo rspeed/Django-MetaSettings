@@ -2,6 +2,10 @@
 
 Simplify the obnoxious task of configuring the same Django project in multiple environments.
 
+## Warning
+
+This project is no longer maintained and should not be used in a production environment. The techniques I had used ended up being too problematic and hacky. After a series of discussions with [matthewwithanm](https://github.com/matthewwithanm/), we came up with some ideas to solve the same set of issues in a very different way. Those ideas were used in [django-classbasedsettings](https://github.com/matthewwithanm/django-classbasedsettings), which I highly recommend.
+
 ## About
 
 Django MetaSettings allows you to place settings specific to different environments into separate files. Based on certain environmental conditions different settings can be loaded from multiple sources. This solves the classic issues of unnecessary development/production branches, or leaving uncommitted code changes sitting on a server.
